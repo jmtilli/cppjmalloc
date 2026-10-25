@@ -18,8 +18,21 @@ struct jmalloc_block {
 };
 
 #ifndef HAS_CLZ
-extern const uint8_t lookup[129];
-extern const uint8_t lookup2[256];
+static inline const uint8_t *get_lookup(void) 
+{
+  static const uint8_t lookup[129] = {
+    0,0,1,2,2,3,3,3,3,4,4,4,4,4,4,4,4,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7
+  };
+  return lookup;
+}
+
+static inline const uint8_t *get_lookup2(void) 
+{
+  static const uint8_t lookup2[256] = {
+    0,1,2,2,3,3,3,3,4,4,4,4,4,4,4,4,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8
+  };
+  return lookup2;
+}
 #endif
 
 // Most of the time, this function is expected to be optimized away
@@ -131,14 +144,14 @@ struct JMallocImpl {
 #else
       if (sz > 2048)
       {
-        lookupval = lookup2[(sz-1)/4096]+8;
+        lookupval = get_lookup2()[(sz-1)/4096]+8;
         lookupval = normalize_lookupval(lookupval);
         ls = &blocks[lookupval];
         sz = 1<<(4+lookupval);
       }
       else
       {
-        lookupval = lookup[(sz+15)/16];
+        lookupval = get_lookup()[(sz+15)/16];
         lookupval = normalize_lookupval(lookupval);
         ls = &blocks[lookupval];
         sz = 1<<(4+lookupval);
@@ -175,14 +188,14 @@ struct JMallocImpl {
 #else
       if (sz > 2048)
       {
-        lookupval = lookup2[(sz-1)/4096]+8;
+        lookupval = get_lookup2()[(sz-1)/4096]+8;
         lookupval = normalize_lookupval(lookupval);
         ls = &blocks[lookupval];
         sz = 1<<(4+lookupval);
       }
       else
       {
-        lookupval = lookup[(sz+15)/16];
+        lookupval = get_lookup()[(sz+15)/16];
         lookupval = normalize_lookupval(lookupval);
         ls = &blocks[lookupval];
         sz = 1<<(4+lookupval);

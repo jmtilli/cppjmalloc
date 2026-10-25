@@ -17,7 +17,7 @@ $CXXFLAGS ?= @nil
   @endif
 @endif
 
-$(SRC) = ['cppjmalloc.cc', 'cppjmalloctest.cc']
+$(SRC) = ['cppjmalloctest.cc']
 $(OBJ) = @sufsuball($(SRC), ".cc", ".o")
 $(DEP) = @sufsuball($(SRC), ".cc", ".d")
 
