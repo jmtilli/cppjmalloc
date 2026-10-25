@@ -113,6 +113,19 @@ static inline std::int8_t normalize_lookupval(std::int8_t lookupval)
   return lookupval;
 }
 
+static inline constexpr std::size_t default_arena_size(void)
+{
+  return 512*1024;
+}
+static inline constexpr std::size_t default_threshold(void)
+{
+  return 128*1024;
+}
+static inline constexpr std::size_t default_list_count(void)
+{
+  return 14;
+}
+
 struct JMallocImpl {
   private:
     JMallocImpl(const JMallocImpl&) = delete;
@@ -125,7 +138,7 @@ struct JMallocImpl {
     std::vector<struct jmalloc_block*> blocks;
 
   public:
-    JMallocImpl(std::size_t sz=512*1024, std::size_t threshold=128*1024, std::size_t list_count=14):
+    JMallocImpl(std::size_t sz=default_arena_size(), std::size_t threshold=default_threshold(), std::size_t list_count=default_list_count()):
       mptr(std::make_shared<jmtilli::mpa::MovePtrAllocatorImpl>(sz, threshold))
     {
       std::size_t i;
@@ -143,7 +156,7 @@ struct JMallocImpl {
         blocks.push_back(nullptr);
       }
     }
-    JMallocImpl(std::shared_ptr<jmtilli::mpa::MovePtrAllocatorImpl> &mptr, std::size_t list_count=14): mptr(mptr)
+    JMallocImpl(std::shared_ptr<jmtilli::mpa::MovePtrAllocatorImpl> &mptr, std::size_t list_count=default_list_count()): mptr(mptr)
     {
       std::size_t i;
       std::size_t largest_block_size = 16U<<(list_count-1);
@@ -314,7 +327,7 @@ struct JMallocTypeAllocatorDangerous {
     }
 };
 
-static inline std::shared_ptr<JMallocImpl> make_impl(std::size_t arenasz=512*1024, std::size_t thresh=128*1024, std::size_t list_count=14)
+static inline std::shared_ptr<JMallocImpl> make_impl(std::size_t arenasz=default_arena_size(), std::size_t thresh=default_threshold(), std::size_t list_count=default_list_count())
 {
     return std::make_shared<JMallocImpl>(arenasz, thresh);
 }
