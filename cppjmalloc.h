@@ -38,17 +38,17 @@ struct jmalloc_block {
 };
 
 #ifndef JMTILLI_JMALLOC_HAS_CLZ
-static inline const uint8_t *get_lookup(void) 
+static inline const std::uint8_t *get_lookup(void) 
 {
-  static const uint8_t lookup[129] = {
+  static const std::uint8_t lookup[129] = {
     0,0,1,2,2,3,3,3,3,4,4,4,4,4,4,4,4,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7
   };
   return lookup;
 }
 
-static inline const uint8_t *get_lookup2(void) 
+static inline const std::uint8_t *get_lookup2(void) 
 {
-  static const uint8_t lookup2[256] = {
+  static const std::uint8_t lookup2[256] = {
     0,1,2,2,3,3,3,3,4,4,4,4,4,4,4,4,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8
   };
   return lookup2;
@@ -56,7 +56,7 @@ static inline const uint8_t *get_lookup2(void)
 #endif
 
 // Most of the time, this function is expected to be optimized away
-static inline int8_t normalize_lookupval(int8_t lookupval)
+static inline std::int8_t normalize_lookupval(std::int8_t lookupval)
 {
   if (lookupval == 0 && (sizeof(struct jmalloc_block) > 16 || alignof(std::max_align_t) > 16))
   {
@@ -146,7 +146,7 @@ struct JMallocImpl {
     {
       struct jmalloc_block **ls = NULL;
       struct jmalloc_block *blk;
-      int8_t lookupval;
+      std::int8_t lookupval;
       static_assert(sizeof(struct jmalloc_block) <= 131072 && alignof(std::max_align_t) <= 131072, "too strict alignment constraints");
       if (sz > 128*1024)
       {
@@ -190,7 +190,7 @@ struct JMallocImpl {
     {
       struct jmalloc_block **ls = NULL;
       struct jmalloc_block *blk = reinterpret_cast<struct jmalloc_block*>(ptr);
-      int8_t lookupval;
+      std::int8_t lookupval;
       if (sz > 128*1024)
       {
         delete[] static_cast<char*>(ptr);
@@ -308,7 +308,7 @@ struct JMallocTypeAllocatorDangerous {
     }
 };
 
-static inline std::shared_ptr<JMallocImpl> make_impl(size_t arenasz, size_t thresh)
+static inline std::shared_ptr<JMallocImpl> make_impl(std::size_t arenasz, std::size_t thresh)
 {
     return std::make_shared<JMallocImpl>(arenasz, thresh);
 }
