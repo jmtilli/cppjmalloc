@@ -158,25 +158,19 @@ struct JMallocImpl {
       {
         lookupval = 0;
       }
-      lookupval = normalize_lookupval(lookupval);
-      ls = &blocks[lookupval];
-      sz = 1<<(4+lookupval);
 #else
       if (sz > 2048)
       {
         lookupval = get_lookup2()[(sz-1)/4096]+8;
-        lookupval = normalize_lookupval(lookupval);
-        ls = &blocks[lookupval];
-        sz = 1<<(4+lookupval);
       }
       else
       {
         lookupval = get_lookup()[(sz+15)/16];
-        lookupval = normalize_lookupval(lookupval);
-        ls = &blocks[lookupval];
-        sz = 1<<(4+lookupval);
       }
 #endif
+      lookupval = normalize_lookupval(lookupval);
+      ls = &blocks[lookupval];
+      sz = 1<<(4+lookupval);
       if (!*ls)
       {
         return mptr->alloc(sz, alignof(std::max_align_t));
@@ -202,25 +196,19 @@ struct JMallocImpl {
       {
         lookupval = 0;
       }
-      lookupval = normalize_lookupval(lookupval);
-      ls = &blocks[lookupval];
-      sz = 1<<(4+lookupval);
 #else
       if (sz > 2048)
       {
         lookupval = get_lookup2()[(sz-1)/4096]+8;
-        lookupval = normalize_lookupval(lookupval);
-        ls = &blocks[lookupval];
-        sz = 1<<(4+lookupval);
       }
       else
       {
         lookupval = get_lookup()[(sz+15)/16];
-        lookupval = normalize_lookupval(lookupval);
-        ls = &blocks[lookupval];
-        sz = 1<<(4+lookupval);
       }
 #endif
+      lookupval = normalize_lookupval(lookupval);
+      ls = &blocks[lookupval];
+      sz = 1<<(4+lookupval);
       blk->u.next = *ls;
       *ls = blk;
     }
