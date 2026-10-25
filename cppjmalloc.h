@@ -33,9 +33,7 @@
 namespace jmtilli { namespace jmalloc {
 
 struct jmalloc_block {
-  union {
-    struct jmalloc_block *next;
-  } u;
+  struct jmalloc_block *next;
 };
 
 #ifndef JMTILLI_JMALLOC_HAS_CLZ
@@ -196,7 +194,7 @@ struct JMallocImpl {
         return mptr->alloc(sz, alignof(std::max_align_t));
       }
       blk = *ls;
-      *ls = blk->u.next;
+      *ls = blk->next;
       return blk;
     }
 
@@ -229,7 +227,7 @@ struct JMallocImpl {
       lookupval = normalize_lookupval(lookupval);
       ls = &blocks[lookupval];
       sz = 1<<(4+lookupval);
-      blk->u.next = *ls;
+      blk->next = *ls;
       *ls = blk;
     }
 };
