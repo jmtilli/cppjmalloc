@@ -8,6 +8,7 @@
 #include <cstring>
 #include <memory>
 #include <stdexcept>
+#include <vector>
 
 // LLVM 2.6 is first with clang, it supports __has_builtin
 // GCC 3.4 is the first GCC with __has_clz
@@ -56,6 +57,7 @@ static inline const std::uint8_t *get_lookup2(void)
 #endif
 
 // Most of the time, this function is expected to be optimized away
+static_assert(sizeof(struct jmalloc_block) <= 131072 && alignof(std::max_align_t) <= 131072, "too strict alignment constraints");
 static inline std::int8_t normalize_lookupval(std::int8_t lookupval)
 {
   if (lookupval == 0 && (sizeof(struct jmalloc_block) > 16 || alignof(std::max_align_t) > 16))
@@ -121,24 +123,43 @@ struct JMallocImpl {
     std::shared_ptr<jmtilli::mpa::MovePtrAllocatorImpl> mptr;
 
     // 16, 32, 64, 128, 256, 512, 1K, 2K, 4K, 8K, 16K, 32K, 64K, 128K
-    struct jmalloc_block *blocks[14];
+    //struct jmalloc_block *blocks[14];
+    std::vector<struct jmalloc_block*> blocks;
 
   public:
-    JMallocImpl(std::size_t sz, std::size_t align):
-      mptr(std::make_shared<jmtilli::mpa::MovePtrAllocatorImpl>(sz, align))
+    JMallocImpl(std::size_t sz=512*1024, std::size_t threshold=128*1024, std::size_t list_count=14):
+      mptr(std::make_shared<jmtilli::mpa::MovePtrAllocatorImpl>(sz, threshold))
     {
       std::size_t i;
-      for (i = 0; i < sizeof(blocks)/sizeof(*blocks); i++)
+      std::size_t largest_block_size = 16U<<(list_count-1);
+      if (list_count < 1 || sizeof(struct jmalloc_block) > largest_block_size || alignof(std::max_align_t) > largest_block_size)
       {
-        blocks[i] = nullptr;
+        throw std::invalid_argument("too few lists");
+      }
+      if (list_count > 17)
+      {
+        throw std::invalid_argument("max supported list_count is 17");
+      }
+      for (i = 0; i < list_count; i++)
+      {
+        blocks.push_back(nullptr);
       }
     }
-    JMallocImpl(std::shared_ptr<jmtilli::mpa::MovePtrAllocatorImpl> &mptr): mptr(mptr)
+    JMallocImpl(std::shared_ptr<jmtilli::mpa::MovePtrAllocatorImpl> &mptr, std::size_t list_count=14): mptr(mptr)
     {
       std::size_t i;
-      for (i = 0; i < sizeof(blocks)/sizeof(*blocks); i++)
+      std::size_t largest_block_size = 16U<<(list_count-1);
+      if (list_count < 1 || sizeof(struct jmalloc_block) > largest_block_size || alignof(std::max_align_t) > largest_block_size)
       {
-        blocks[i] = nullptr;
+        throw std::invalid_argument("too few lists");
+      }
+      if (list_count > 17)
+      {
+        throw std::invalid_argument("max supported list_count is 17");
+      }
+      for (i = 0; i < list_count; i++)
+      {
+        blocks.push_back(nullptr);
       }
     }
 
@@ -147,8 +168,7 @@ struct JMallocImpl {
       struct jmalloc_block **ls = NULL;
       struct jmalloc_block *blk;
       std::int8_t lookupval;
-      static_assert(sizeof(struct jmalloc_block) <= 131072 && alignof(std::max_align_t) <= 131072, "too strict alignment constraints");
-      if (sz > 128*1024)
+      if (sz > (16U<<(blocks.size()-1)))
       {
         return new char[sz];
       }
@@ -185,7 +205,7 @@ struct JMallocImpl {
       struct jmalloc_block **ls = NULL;
       struct jmalloc_block *blk = reinterpret_cast<struct jmalloc_block*>(ptr);
       std::int8_t lookupval;
-      if (sz > 128*1024)
+      if (sz > (16U<<(blocks.size()-1)))
       {
         delete[] static_cast<char*>(ptr);
         return;
@@ -240,7 +260,7 @@ struct JMallocTypeAllocator {
     void deallocate(T* p, std::size_t n) noexcept {
         if (n > SIZE_MAX/sizeof(T))
         {
-	    std::terminate();
+            std::terminate();
         }
         return impl->dealloc(p, n*sizeof(T));
     }
@@ -281,7 +301,7 @@ struct JMallocTypeAllocatorDangerous {
     void deallocate(T* p, std::size_t n) noexcept {
         if (n > SIZE_MAX/sizeof(T))
         {
-	    std::terminate();
+            std::terminate();
         }
         return impl->dealloc(p, n*sizeof(T));
     }
@@ -296,7 +316,7 @@ struct JMallocTypeAllocatorDangerous {
     }
 };
 
-static inline std::shared_ptr<JMallocImpl> make_impl(std::size_t arenasz, std::size_t thresh)
+static inline std::shared_ptr<JMallocImpl> make_impl(std::size_t arenasz=512*1024, std::size_t thresh=128*1024, std::size_t list_count=14)
 {
     return std::make_shared<JMallocImpl>(arenasz, thresh);
 }

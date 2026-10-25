@@ -6,7 +6,7 @@ namespace jma = jmtilli::jmalloc;
 int main(int argc, char **argv)
 {
   // same as std::make_shared<jma::JMallocImpl>(..., ...);
-  auto impl = jma::make_impl(512*1024, 128*1024);
+  auto impl = jma::make_impl(512*1024, 128*1024, 14);
   jma::TypeAlloc<double> dblalloc(impl);
   using DblTraits = std::allocator_traits<jma::TypeAlloc<double> >;
   std::vector<int, jma::TypeAlloc<int> > vec(impl);
