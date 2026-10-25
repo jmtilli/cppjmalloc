@@ -1,0 +1,3 @@
+[submodule "cppmoveptralloc"]
+	path = cppmoveptralloc
+	url = https://github.com/jmtilli/cppmoveptralloc

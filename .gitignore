@@ -1,0 +1,4 @@
+/.stir.db
+*.o
+*.d
+/test
