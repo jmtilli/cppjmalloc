@@ -1,5 +1,7 @@
 # cppjmalloc
 
+![cppjmalloc](jmallocpplogo.png)
+
 cppjmalloc is a memory allocator for C++ that's on a completely different
 location of the high performance - low fragmentation scale than most allocators
 out there. While most allocators waste CPU cycles to save memory, cppjmalloc
